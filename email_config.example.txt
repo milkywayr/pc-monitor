@@ -1,0 +1,21 @@
+# PC Monitor 이메일 설정 예제
+#
+# 사용 방법:
+# 1. 이 파일을 email_config.txt로 복사
+# 2. 아래 설정값 입력
+#
+# Gmail 앱 비밀번호 생성 방법:
+# 1. https://myaccount.google.com/security 접속
+# 2. 2단계 인증 활성화 (필수)
+# 3. https://myaccount.google.com/apppasswords 접속
+# 4. 앱 선택: 메일, 기기 선택: Windows 컴퓨터
+# 5. 생성된 16자리 비밀번호를 아래에 입력
+
+# 발신자 Gmail 주소
+sender_email=your_email@gmail.com
+
+# Gmail 앱 비밀번호 (16자리, 공백 없이)
+sender_password=abcd efgh ijkl mnop
+
+# 수신자 이메일 주소 (비워두면 발신자와 동일)
+receiver_email=

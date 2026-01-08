@@ -2,6 +2,9 @@
 data/
 output/
 
+# 이메일 설정 (비밀번호 포함)
+email_config.txt
+
 # Python
 __pycache__/
 *.py[cod]

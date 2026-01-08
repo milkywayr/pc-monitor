@@ -23,6 +23,7 @@ from recent_files import get_recent_files_summary
 from roblox_games import get_roblox_summary
 from report_generator import generate_html_report, generate_dashboard_html
 from data_storage import save_daily_data, get_available_dates
+from email_sender import send_email, load_email_config
 
 
 def print_banner():
@@ -145,6 +146,24 @@ def main():
     available_dates = get_available_dates()
     dashboard_path = os.path.join(output_dir, 'dashboard.html')
     generate_dashboard_html(available_dates, dashboard_path)
+
+    # 4. 이메일 발송 (오늘 데이터가 있으면)
+    today_str = today.strftime('%Y-%m-%d')
+    email_config = load_email_config()
+    if email_config.get('sender_email') and email_config.get('sender_password'):
+        if today_str in dates_with_data:
+            print("[*] 이메일 발송 중...")
+            today_report = os.path.join(output_dir, f'daily_{today_str}.html')
+            today_data_path = os.path.join(os.path.dirname(__file__), 'data', f'daily_{today_str}.json')
+
+            # 오늘 데이터 다시 로드
+            from data_storage import load_daily_data
+            today_data = load_daily_data(today_str)
+            if today_data:
+                send_email(today_data, today_str, today_report)
+    else:
+        print("[*] 이메일 설정이 없어 발송을 건너뜁니다.")
+        print("    (email_config.txt 파일에 설정을 입력하세요)")
 
     print()
     print("=" * 60)
