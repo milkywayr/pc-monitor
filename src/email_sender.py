@@ -138,17 +138,55 @@ def create_summary_html(data: Dict, date: str) -> str:
     return html
 
 
-def send_email(data: Dict, date: str, report_path: Optional[str] = None) -> bool:
+def get_last_sent_date() -> Optional[str]:
+    """마지막 이메일 발송 날짜 확인"""
+    sent_file = os.path.join(os.path.dirname(__file__), '..', 'data', 'last_email_sent.txt')
+
+    if os.path.exists(sent_file):
+        try:
+            with open(sent_file, 'r') as f:
+                return f.read().strip()
+        except:
+            pass
+    return None
+
+
+def mark_email_sent(date: str):
+    """이메일 발송 완료 기록"""
+    data_dir = os.path.join(os.path.dirname(__file__), '..', 'data')
+    os.makedirs(data_dir, exist_ok=True)
+
+    sent_file = os.path.join(data_dir, 'last_email_sent.txt')
+    try:
+        with open(sent_file, 'w') as f:
+            f.write(date)
+    except Exception as e:
+        print(f"[!] 발송 기록 저장 실패: {e}")
+
+
+def was_email_sent_today(date: str) -> bool:
+    """오늘 이미 이메일을 발송했는지 확인"""
+    last_sent = get_last_sent_date()
+    return last_sent == date
+
+
+def send_email(data: Dict, date: str, report_path: Optional[str] = None, force: bool = False) -> bool:
     """이메일 발송
 
     Args:
         data: 수집된 데이터
         date: 리포트 날짜
         report_path: HTML 리포트 파일 경로 (첨부용)
+        force: True면 이미 발송했어도 다시 발송
 
     Returns:
         발송 성공 여부
     """
+    # 이미 오늘 발송했는지 확인
+    if not force and was_email_sent_today(date):
+        print(f"[*] 오늘({date}) 이미 이메일을 발송했습니다. (건너뜀)")
+        return True
+
     config = load_email_config()
 
     # 설정 확인
@@ -191,6 +229,10 @@ def send_email(data: Dict, date: str, report_path: Optional[str] = None) -> bool
             server.send_message(msg)
 
         print(f"[+] 이메일 발송 완료!")
+
+        # 발송 완료 기록
+        mark_email_sent(date)
+
         return True
 
     except smtplib.SMTPAuthenticationError:
